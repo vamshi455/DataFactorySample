@@ -1,0 +1,7 @@
+{
+	"name": "HpLocalSqlServer",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Vamshi HP Laptop SQL Server"
+	}
+}
