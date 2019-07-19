@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "DataFactoryExampleVamshi"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"value": ""
+		},
+		"localSQl_connectionString": {
+			"value": ""
+		},
+		"RestService1_properties_typeProperties_url": {
+			"value": "http://api.openweathermap.org/data/2.5/weather?q=austin&appid=b742e1405c1084e1a02fc089c7e946b9"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
