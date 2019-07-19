@@ -1,0 +1,25 @@
+{
+	"name": "Trigger1",
+	"properties": {
+		"description": "Scheduled to run every one hour",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pipeline1",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 1,
+				"startTime": "2019-07-19T12:17:00.000Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
