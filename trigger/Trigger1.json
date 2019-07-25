@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "Scheduled to run every one hour",
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
