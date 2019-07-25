@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "DataFactoryExampleVamshi"
 		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
 		"AzureSqlDatabase1_connectionString": {
 			"value": ""
 		},

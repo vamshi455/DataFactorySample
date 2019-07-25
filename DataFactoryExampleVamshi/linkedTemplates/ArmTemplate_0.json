@@ -7,6 +7,10 @@
 			"metadata": "Data Factory Name",
 			"defaultValue": "DataFactoryExampleVamshi"
 		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
 		"AzureSqlDatabase1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
@@ -24,6 +28,19 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -48,6 +65,49 @@
 					"url": "[parameters('RestService1_properties_typeProperties_url')]",
 					"enableServerCertificateValidation": true,
 					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Run Dim Emp SCD 5')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2019-07-25T16:51:00.000Z",
+						"endTime": "2019-07-27T16:51:00.000Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Trigger1')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Scheduled to run every one hour",
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 1,
+						"startTime": "2019-07-19T12:17:00.000Z",
+						"endTime": "2019-07-26T13:43:14.719Z",
+						"timeZone": "UTC"
+					}
 				}
 			},
 			"dependsOn": []
@@ -86,11 +146,141 @@
 				"type": "AzureSqlTable",
 				"schema": [],
 				"typeProperties": {
-					"tableName": "[[dbo].[Product]"
+					"tableName": "[[dbo].[DimEmp]"
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimEmp1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "EmpID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "surrogatekey",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Region",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Status",
+						"type": "nvarchar"
+					},
+					{
+						"name": "EmpFunction",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Level",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Role",
+						"type": "nvarchar"
+					},
+					{
+						"name": "StartDate",
+						"type": "date"
+					},
+					{
+						"name": "EndDate",
+						"type": "date"
+					},
+					{
+						"name": "iscurrent",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "processtime",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"tableName": "[[dbo].[DimEmp]"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EmployeeFiles1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Employee1.csv",
+						"container": "inputfiles"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "EmpID",
+						"type": "String"
+					},
+					{
+						"name": "Region",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					},
+					{
+						"name": "Function",
+						"type": "String"
+					},
+					{
+						"name": "Level",
+						"type": "String"
+					},
+					{
+						"name": "Role",
+						"type": "String"
+					},
+					{
+						"name": "StartDate",
+						"type": "String"
+					},
+					{
+						"name": "EndDate",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		},
 		{
@@ -255,308 +445,138 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/DimEmployeeLoader21')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "EmployeeFiles1",
+								"type": "DatasetReference"
+							},
+							"name": "Employees1",
+							"description": " Source employees file, changes every day",
+							"typeProperties": {}
+						},
+						{
+							"dataset": {
+								"referenceName": "DimEmp1",
+								"type": "DatasetReference"
+							},
+							"name": "DimEmployees",
+							"typeProperties": {}
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DimEmp1",
+								"type": "DatasetReference"
+							},
+							"name": "sinkNew",
+							"description": " "
+						},
+						{
+							"dataset": {
+								"referenceName": "DimEmp1",
+								"type": "DatasetReference"
+							},
+							"name": "sinkUpdates",
+							"description": " "
+						},
+						{
+							"dataset": {
+								"referenceName": "DimEmp1",
+								"type": "DatasetReference"
+							},
+							"name": "sinkInactive",
+							"description": " Age out old rows"
+						}
+					],
+					"script": "\n\nsource(output(\n\t\tEmpID as short,\n\t\tRegion as string,\n\t\tStatus as string,\n\t\tFunction as string,\n\t\tLevel as string,\n\t\tRole as string,\n\t\tStartDate as string,\n\t\tEndDate as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpurgeFiles: true) ~> Employees1\nsource(output(\n\t\tEmpID as integer,\n\t\tsurrogatekey as string,\n\t\tLevel as string,\n\t\tRole as string,\n\t\tStartDate as date,\n\t\tEndDate as date,\n\t\tiscurrent as integer,\n\t\tprocesstime as timestamp\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> DimEmployees\nNullFilter derive(EmpID = toInteger(EmpID),\n\t\tStartDate = toDate(StartDate,'MM/dd/yyyy'),\n\t\tEndDate = toDate(EndDate,'MM/dd/yyyy'),\n\t\tprocesstime = currentTimestamp()) ~> TypeConversionsAndSetAttrs\nTypeConversionsAndSetAttrs, DimEmployees lookup(TypeConversionsAndSetAttrs@EmpID == DimEmployees@EmpID,\n\tbroadcast: 'none')~> LookupIDs\nNormNames split(isNull(iscurrent),\n\tdisjoint: false) ~> ConditionalSplit1@(NewRow, CheckForUpdates)\nNameNorm2, DimEmployees exists(NameNorm2@EmpID == DimEmployees@EmpID,\n\tnegate:false,\n\tbroadcast: 'none')~> checkForChanges\nConditionalSplit1@NewRow derive(iscurrent = 1,\n\t\tsurrogatekey = toString(crc32(EmpID,Function))) ~> SetAttrsForNew\ncheckForChanges derive(iscurrent = 0) ~> SetAttrsInactive\ncheckForChanges derive(iscurrent = 1) ~> SetAttrsUpdate\nLookupIDs select(mapColumn(\n\t\tEmpID = TypeConversionsAndSetAttrs@EmpID,\n\t\tRegion,\n\t\tStatus,\n\t\tFunction,\n\t\tLevel = Employees1@Level,\n\t\tRole = Employees1@Role,\n\t\tStartDate = TypeConversionsAndSetAttrs@StartDate,\n\t\tEndDate = TypeConversionsAndSetAttrs@EndDate,\n\t\tprocesstime = TypeConversionsAndSetAttrs@processtime,\n\t\tiscurrent\n\t)) ~> NormNames\nSetAttrsInactive select(mapColumn(\n\t\tEmpID,\n\t\tStatus,\n\t\tEndDate,\n\t\tiscurrent,\n\t\tprocesstime\n\t)) ~> InactiveFields\nInactiveFields alterRow(updateIf(true())) ~> AlterRow1\nEmployees1 filter(!isNull(EmpID)) ~> NullFilter\nConditionalSplit1@CheckForUpdates select() ~> NameNorm2\nDimEmployees derive(EmpID = toInteger(EmpID)) ~> DerivedColumn1\nSetAttrsForNew sink(input(\n\t\tEmpID as integer,\n\t\tsurrogatekey as string,\n\t\tRegion as string,\n\t\tStatus as string,\n\t\tEmpFunction as string,\n\t\tLevel as string,\n\t\tRole as string,\n\t\tStartDate as date,\n\t\tEndDate as date,\n\t\tiscurrent as integer,\n\t\tprocesstime as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'table',\n\tbatchSize: 50,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tmapColumn(\n\t\tEmpID,\n\t\tsurrogatekey,\n\t\tLevel,\n\t\tRole,\n\t\tStartDate,\n\t\tEndDate,\n\t\tiscurrent,\n\t\tprocesstime,\n\t\tRegion,\n\t\tStatus,\n\t\tEmpFunction = Function\n\t),\n\tpartitionBy('roundRobin', 2)) ~> sinkNew\nSetAttrsUpdate sink(input(\n\t\tEmpID as integer,\n\t\tsurrogatekey as string,\n\t\tRegion as string,\n\t\tStatus as string,\n\t\tEmpFunction as string,\n\t\tLevel as string,\n\t\tRole as string,\n\t\tStartDate as date,\n\t\tEndDate as date,\n\t\tiscurrent as integer,\n\t\tprocesstime as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'table',\n\tbatchSize: 50,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tmapColumn(\n\t\tEmpID,\n\t\tLevel,\n\t\tRole,\n\t\tStartDate,\n\t\tEndDate,\n\t\tiscurrent,\n\t\tprocesstime,\n\t\tRegion,\n\t\tStatus,\n\t\tEmpFunction = Function\n\t),\n\tpartitionBy('roundRobin', 4)) ~> sinkUpdates\nAlterRow1 sink(input(\n\t\tEmpID as integer,\n\t\tsurrogatekey as string,\n\t\tRegion as string,\n\t\tStatus as string,\n\t\tEmpFunction as string,\n\t\tLevel as string,\n\t\tRole as string,\n\t\tStartDate as date,\n\t\tEndDate as date,\n\t\tiscurrent as integer,\n\t\tprocesstime as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'table',\n\tbatchSize: 50,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['EmpID'],\n\tmapColumn(\n\t\tEmpID,\n\t\tEndDate,\n\t\tiscurrent,\n\t\tprocesstime\n\t),\n\tpartitionBy('roundRobin', 4)) ~> sinkInactive"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/EmployeeFiles1')]",
+				"[concat(variables('factoryId'), '/datasets/DimEmp1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DimEmployeePipeline1')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy Data1",
-						"type": "Copy",
+						"name": "LoadDimEmployee",
+						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
-							"retry": 0,
+							"retry": 3,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "SqlServerSource"
+							"dataflow": {
+								"referenceName": "DimEmployeeLoader21",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"Employees1": {},
+									"DimEmployees": {},
+									"sinkNew": {},
+									"sinkUpdates": {},
+									"sinkInactive": {}
+								}
 							},
-							"sink": {
-								"type": "AzureSqlSink"
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "ProductID",
-											"type": "Int32"
-										},
-										"sink": {
-											"name": "ProductID",
-											"type": "Int32"
-										}
-									},
-									{
-										"source": {
-											"name": "Name",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Name",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "ProductNumber",
-											"type": "String"
-										},
-										"sink": {
-											"name": "ProductNumber",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "MakeFlag",
-											"type": "Boolean"
-										},
-										"sink": {
-											"name": "MakeFlag",
-											"type": "Boolean"
-										}
-									},
-									{
-										"source": {
-											"name": "FinishedGoodsFlag",
-											"type": "Boolean"
-										},
-										"sink": {
-											"name": "FinishedGoodsFlag",
-											"type": "Boolean"
-										}
-									},
-									{
-										"source": {
-											"name": "Color",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Color",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "SafetyStockLevel",
-											"type": "Int16"
-										},
-										"sink": {
-											"name": "SafetyStockLevel",
-											"type": "Int16"
-										}
-									},
-									{
-										"source": {
-											"name": "ReorderPoint",
-											"type": "Int16"
-										},
-										"sink": {
-											"name": "ReorderPoint",
-											"type": "Int16"
-										}
-									},
-									{
-										"source": {
-											"name": "StandardCost",
-											"type": "Decimal"
-										},
-										"sink": {
-											"name": "StandardCost",
-											"type": "Decimal"
-										}
-									},
-									{
-										"source": {
-											"name": "ListPrice",
-											"type": "Decimal"
-										},
-										"sink": {
-											"name": "ListPrice",
-											"type": "Decimal"
-										}
-									},
-									{
-										"source": {
-											"name": "Size",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Size",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "SizeUnitMeasureCode",
-											"type": "String"
-										},
-										"sink": {
-											"name": "SizeUnitMeasureCode",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "WeightUnitMeasureCode",
-											"type": "String"
-										},
-										"sink": {
-											"name": "WeightUnitMeasureCode",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Weight",
-											"type": "Decimal"
-										},
-										"sink": {
-											"name": "Weight",
-											"type": "Decimal"
-										}
-									},
-									{
-										"source": {
-											"name": "DaysToManufacture",
-											"type": "Int32"
-										},
-										"sink": {
-											"name": "DaysToManufacture",
-											"type": "Int32"
-										}
-									},
-									{
-										"source": {
-											"name": "ProductLine",
-											"type": "String"
-										},
-										"sink": {
-											"name": "ProductLine",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Class",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Class",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Style",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Style",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "ProductSubcategoryID",
-											"type": "Int32"
-										},
-										"sink": {
-											"name": "ProductSubcategoryID",
-											"type": "Int32"
-										}
-									},
-									{
-										"source": {
-											"name": "ProductModelID",
-											"type": "Int32"
-										},
-										"sink": {
-											"name": "ProductModelID",
-											"type": "Int32"
-										}
-									},
-									{
-										"source": {
-											"name": "SellStartDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "SellStartDate",
-											"type": "DateTime"
-										}
-									},
-									{
-										"source": {
-											"name": "SellEndDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "SellEndDate",
-											"type": "DateTime"
-										}
-									},
-									{
-										"source": {
-											"name": "DiscontinuedDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "DiscontinuedDate",
-											"type": "DateTime"
-										}
-									},
-									{
-										"source": {
-											"name": "rowguid",
-											"type": "Guid"
-										},
-										"sink": {
-											"name": "rowguid",
-											"type": "Guid"
-										}
-									},
-									{
-										"source": {
-											"name": "ModifiedDate",
-											"type": "DateTime"
-										},
-										"sink": {
-											"name": "ModifiedDate",
-											"type": "DateTime"
-										}
-									}
-								]
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "SqlServerTable1",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "AzureSQLServer",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
+							"staging": {}
+						}
 					}
 				],
+				"folder": {
+					"name": "Demos"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/SqlServerTable1')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSQLServer')]"
+				"[concat(variables('factoryId'), '/dataflows/DimEmployeeLoader21')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/newtrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "DimEmployeePipeline1",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2019-07-25T13:48:00.000Z",
+						"endTime": "2019-07-28T13:48:00.000Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/DimEmployeePipeline1')]"
 			]
 		}
 	]
