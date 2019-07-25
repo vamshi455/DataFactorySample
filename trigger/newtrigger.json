@@ -1,0 +1,25 @@
+{
+	"name": "newtrigger",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "DimEmployeePipeline1",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2019-07-25T13:48:00.000Z",
+				"endTime": "2019-07-28T13:48:00.000Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}
